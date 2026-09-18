@@ -29,7 +29,8 @@ The objective of this project is to:
 ├── print_functions_for_lab_checks.py # Debugging / lab verification helpers
 ├── test_modules.py                   # Unit testing script
 ├── dognames.txt                      # Reference dataset of recognized dog names
-├── pet_images/                       # Sample dataset of pet images
+├── pet_images/                       # The 40 course pet images (not committed)
+├── validate_dataset.py               # Preflight check on the pet_images dataset
 ├── run_models_batch.bat              # Batch script for Windows
 ├── run_models_batch.sh               # Batch script for Linux/macOS
 ├── alexnet_pet-images.txt            # Results log for AlexNet
@@ -46,7 +47,24 @@ The objective of this project is to:
 Ensure you have Python 3 and PyTorch installed:
 
 ```bash
-pip install torch torchvision torchvision-models pillow
+pip install torch torchvision pillow
+```
+
+You also need two things that ship with the Udacity project workspace and are
+**not** committed to this repository:
+
+- `pet_images/` — the 40 course pet images (30 dog, 10 not-a-dog). Copy the
+  originals; placeholder or substitute images make the results ungradeable.
+- `imagenet1000_clsidx_to_labels.txt` — the ImageNet class-index mapping. This
+  file carries the full comma-separated synonym lists (e.g.
+  `German shepherd, German shepherd dog, ...`) that breed matching against
+  `dognames.txt` depends on. torchvision's own short category names are not a
+  substitute.
+
+Before running the batch, confirm the dataset is intact:
+
+```bash
+python validate_dataset.py --dir pet_images/ --dogfile dognames.txt
 ```
 
 ### Usage
@@ -80,11 +98,17 @@ sh run_models_batch.sh
 
 ## 📊 Summary of Results
 
+The table below records the **expected** figures for the 40-image course set.
+Replace them with the numbers from your own batch run once
+`vgg_pet-images.txt`, `alexnet_pet-images.txt` and `resnet_pet-images.txt` have
+been generated.
+
 | Metric | AlexNet | VGG | ResNet |
 | :--- | :---: | :---: | :---: |
+| **% Match** | ~75% | ~87.5% | ~82.5% |
 | **% Correct Dogs** | 100% | 100% | 100% |
-| **% Correct Breeds** | ~80% | ~93% | ~90% |
-| **% Correct Non-Dogs** | 100% | 100% | 100% |
+| **% Correct Breeds** | ~80% | ~93.3% | ~90% |
+| **% Correct Non-Dogs** | 100% | 100% | ~90% |
 
 *VGG typically delivers the highest breed accuracy, while AlexNet offers the fastest execution time.*
 

@@ -64,11 +64,17 @@ def adjust_results4_isadog(results_dic, dogfile):
         else:
             pet_is_dog = 0
 
-        # Determine if classifier label is a dog
-        if classifier_label in dognames_dic:
-            classifier_is_dog = 1
-        else:
-            classifier_is_dog = 0
+        # Determine if classifier label is a dog. ImageNet labels are
+        # comma-separated synonym lists (e.g. "german shepherd, german shepherd
+        # dog, alsatian") whereas dognames.txt stores one synonym per line, so
+        # the label is split and each term is checked individually. A plain
+        # lookup of the whole label string would never match a multi-synonym
+        # class and would wrongly report those dogs as not-a-dog.
+        classifier_is_dog = 0
+        for term in classifier_label.split(','):
+            if term.strip() in dognames_dic:
+                classifier_is_dog = 1
+                break
 
         # Append results
         results_dic[key].extend([pet_is_dog, classifier_is_dog])
