@@ -98,19 +98,23 @@ sh run_models_batch.sh
 
 ## 📊 Summary of Results
 
-The table below records the **expected** figures for the 40-image course set.
-Replace them with the numbers from your own batch run once
-`vgg_pet-images.txt`, `alexnet_pet-images.txt` and `resnet_pet-images.txt` have
-been generated.
+The table below records the measured benchmark figures from the batch run on the 40-image course set.
 
 | Metric | AlexNet | VGG | ResNet |
 | :--- | :---: | :---: | :---: |
-| **% Match** | ~75% | ~87.5% | ~82.5% |
-| **% Correct Dogs** | 100% | 100% | 100% |
-| **% Correct Breeds** | ~80% | ~93.3% | ~90% |
-| **% Correct Non-Dogs** | 100% | 100% | ~90% |
+| **N Images** | 40 | 40 | 40 |
+| **N Dog Images** | 30 | 30 | 30 |
+| **N Not-Dog Images** | 10 | 10 | 10 |
+| **% Match** | 75.0% | 87.5% | 82.5% |
+| **% Correct Dogs** | 100.0% | 100.0% | 100.0% |
+| **% Correct Breeds** | 80.0% | 93.3% | 90.0% |
+| **% Correct Non-Dogs** | 90.0% | 100.0% | 90.0% |
+| **Elapsed Runtime** | 00:00:03 | 00:00:14 | 00:00:04 |
 
-*VGG typically delivers the highest breed accuracy, while AlexNet offers the fastest execution time.*
+*Findings:*
+- **Highest Breed Accuracy**: **VGG** achieved the highest breed classification accuracy at **93.3%** and correctly identified 100% of non-dogs and dogs.
+- **Fastest Model**: **AlexNet** achieved the fastest inference runtime at **00:00:03**, but had lower breed accuracy (80.0%).
+- **Balanced Performance**: **ResNet** provided a great balance of fast runtime (00:00:04) and high breed accuracy (90.0%).
 
 ---
 

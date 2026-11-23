@@ -22,28 +22,65 @@ import torch
 import torchvision.models as models
 import torchvision.transforms as transforms
 
-# Pretrained torchvision models keyed by the --arch values the project accepts
-resnet18 = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
-alexnet = models.alexnet(weights=models.AlexNet_Weights.DEFAULT)
-vgg16 = models.vgg16(weights=models.VGG16_Weights.DEFAULT)
+import ast
+import os
 
-models_dict = {'resnet': resnet18, 'alexnet': alexnet, 'vgg': vgg16}
+from PIL import Image
+import torch
+import torchvision.models as models
+import torchvision.transforms as transforms
+
+# Dictionary to cache initialized models
+models_dict = {}
+models_cache = models_dict
+
+
+def _load_model(arch):
+    """Loads a pretrained CNN architecture, compatible with all torchvision versions."""
+    if hasattr(models, 'ResNet18_Weights'):
+        # torchvision >= 0.13
+        if arch == 'resnet':
+            return models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
+        elif arch == 'alexnet':
+            return models.alexnet(weights=models.AlexNet_Weights.DEFAULT)
+        elif arch == 'vgg':
+            return models.vgg16(weights=models.VGG16_Weights.DEFAULT)
+    else:
+        # torchvision < 0.13
+        if arch == 'resnet':
+            return models.resnet18(pretrained=True)
+        elif arch == 'alexnet':
+            return models.alexnet(pretrained=True)
+        elif arch == 'vgg':
+            return models.vgg16(pretrained=True)
+    raise ValueError(f"Unknown architecture '{arch}'. Expected one of: alexnet, resnet, vgg")
+
 
 # ImageNet class index -> label mapping supplied with the course materials.
-# This file matters: it carries the full comma-separated synonym lists
-# (e.g. "German shepherd, German shepherd dog, ...") that the dognames.txt
-# breed comparison relies on. torchvision's own short category names do not.
-_CLS_IDX_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                             'imagenet1000_clsidx_to_labels.txt')
+# Supports both imagenet1000_clsid_to_human.txt (official workspace name)
+# and imagenet1000_clsidx_to_labels.txt.
+_DIR = os.path.dirname(os.path.abspath(__file__))
+_CANDIDATE_FILES = [
+    os.path.join(_DIR, 'imagenet1000_clsid_to_human.txt'),
+    os.path.join(_DIR, 'imagenet1000_clsidx_to_labels.txt'),
+    'imagenet1000_clsid_to_human.txt',
+    'imagenet1000_clsidx_to_labels.txt'
+]
 
-try:
-    with open(_CLS_IDX_FILE) as f:
-        imagenet_classes_dict = ast.literal_eval(f.read())
-except FileNotFoundError:
+imagenet_classes_dict = None
+for _path in _CANDIDATE_FILES:
+    if os.path.exists(_path):
+        try:
+            with open(_path) as f:
+                imagenet_classes_dict = ast.literal_eval(f.read())
+            break
+        except Exception:
+            continue
+
+if imagenet_classes_dict is None:
     raise FileNotFoundError(
-        "Missing ImageNet class mapping: {}\n"
-        "Copy imagenet1000_clsidx_to_labels.txt from the project workspace "
-        "into this directory before running the classifier.".format(_CLS_IDX_FILE)
+        "Missing ImageNet class mapping: imagenet1000_clsid_to_human.txt / imagenet1000_clsidx_to_labels.txt\n"
+        "Copy imagenet1000_clsid_to_human.txt from the project workspace into this directory."
     )
 
 # Standard ImageNet preprocessing pipeline
@@ -67,10 +104,15 @@ def classifier(img_path, model_name):
       label      - ImageNet classification label predicted by the model (string)
     """
     arch = model_name.lower()
-    if arch not in models_dict:
+    valid_archs = {'resnet', 'alexnet', 'vgg'}
+    if arch not in valid_archs:
         raise ValueError(
             "Unknown architecture '{}'. Expected one of: {}".format(
-                model_name, ", ".join(sorted(models_dict))))
+                model_name, ", ".join(sorted(valid_archs))))
+
+    # Load and cache model on demand
+    if arch not in models_dict:
+        models_dict[arch] = _load_model(arch)
 
     # Load the image; a corrupt or placeholder file raises here rather than
     # silently yielding a prediction.
