@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # */AIPND-revision/intropyproject-classify-pet-images/classifier.py
 #
-# PROGRAMMER: Shamim
+# PROGRAMMER: Hamday Rabby Hossain
 # DATE CREATED: 2026-08-29
 # REVISED DATE: 2026-09-18
 # PURPOSE: Uses pre-trained PyTorch models (ResNet, AlexNet, VGG) to classify

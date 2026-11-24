@@ -25,6 +25,9 @@
 # Imports python modules
 from time import time, sleep
 
+# Imports print functions that check the lab
+from print_functions_for_lab_checks import *
+
 # Imports functions created for this program
 from get_input_args import get_input_args
 from get_pet_labels import get_pet_labels
@@ -38,24 +41,37 @@ def main():
     # Sets start time
     start_time = time()
 
-    # Function that retrieves 3 Command Line Arugments from user as input from
-    # the user running the program from a terminal window
+    # Function that retrieves 3 Command Line Arguments from user as input
     in_arg = get_input_args()
 
-    # Function that creates the results dictionary that contains the results, 
-    # this dictionary is returned from the function call as the variable results
+    # Function that checks command line arguments using in_arg
+    check_command_line_arguments(in_arg)
+
+    # Function that creates the results dictionary that contains the results
     results = get_pet_labels(in_arg.dir)
+
+    # Function that checks Pet Images in the results Dictionary using results
+    check_creating_pet_image_labels(results)
 
     # Function that classifies the images with the CNN model, creates the 
     # classifier labels and compares them to the true pet labels
     classify_images(in_arg.dir, results, in_arg.arch)
 
+    # Function that checks Results Dictionary using results
+    check_classifying_images(results)
+
     # Function that adjusts the results dictionary to indicate if the pet image 
     # is of-a-dog and if the classifier label is of-a-dog
     adjust_results4_isadog(results, in_arg.dogfile)
 
+    # Function that checks Results Dictionary for is-a-dog adjustment using results
+    check_classifying_labels_as_dogs(results)
+
     # Function that calculates the summary statistics of the classification results
     results_stats = calculates_results_stats(results)
+
+    # Function that checks Results Statistics Dictionary using results_stats
+    check_calculating_results(results, results_stats)
 
     # Function that prints the summary results, and any incorrect classifications
     print_results(results, results_stats, in_arg.arch, True, True)
